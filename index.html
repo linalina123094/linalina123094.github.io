@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teachable Machine Image Model</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%; /* Adjusted to take full width */
+            margin: auto;
+            padding: 20px;
+        }
+        #webcam-container {
+            width: 640px; /* Increased webcam size */
+            height: 480px; /* Increased webcam size */
+            margin: 20px auto;
+            border: 5px solid #ddd;
+            position: relative;
+        }
+        #label-container {
+            margin-top: 20px;
+            font-size: 24px; /* Increased font size */
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 40px; /* Increased padding */
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 24px; /* Increased font size */
+            margin: 4px 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+        h1 {
+            font-size: 32px; /* Increased font size */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teachable Machine Image Model</h1>
+        <button type="button" id="startButton">Start</button>
+        <div id="webcam-container"></div>
+        <div id="label-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script type="text/javascript">
+        let model, webcam, labelContainer, maxPredictions;
+
+        async function init() {
+            const URL = "./my_model/";
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            const flip = true; // whether to flip the webcam
+            webcam = new tmImage.Webcam(640, 480, flip); // Increased webcam size
+            await webcam.setup();
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
+        }
+
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction =
+                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+            }
+        }
+
+        window.onload = function() {
+            document.getElementById('startButton').addEventListener('click', init);
+        };
+    </script>
+</body>
+</html>
