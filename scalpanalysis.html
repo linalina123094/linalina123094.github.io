@@ -141,6 +141,26 @@
             <!-- Table rows will be added here by your script -->
         </table>
     </div>
-    <!-- Your existing script -->
+         // ... 기존 스크립트 코드 ...
+
+        let isPredicting = false;
+
+        async function startPredicting() {
+            isPredicting = true;
+            loop();
+        }
+
+        async function stopPredicting() {
+            isPredicting = false;
+            webcam.stop(); // 웹캠 중지
+        }
+
+        // ... 기존 init 함수 및 predict 함수 ...
+
+        window.addEventListener('load', function() {
+            document.getElementById('startButton').addEventListener('click', startPredicting);
+            document.getElementById('stopButton').addEventListener('click', stopPredicting);
+        });
+    </script>
 </body>
-</html> 
+</html>
